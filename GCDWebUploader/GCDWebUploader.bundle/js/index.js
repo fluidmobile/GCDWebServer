@@ -30,6 +30,7 @@ var ENTER_KEYCODE = 13;
 var _path = null;
 var _pendingReloads = [];
 var _reloadingDisabled = 0;
+var _registeredFilesForUpload = [];
 
 function formatFileSize(bytes) {
   if (bytes >= 1000000000) {
@@ -176,6 +177,24 @@ function _reload(path) {
   });
 }
 
+function _registerFilesForUpload(batchIdentifier, files) {
+  $.each(files, function (index, file) {
+    _registeredFilesForUpload[batchIdentifier] = [];
+    _registeredFilesForUpload[batchIdentifier].push(file.name);
+  });
+}
+
+function _unregisterZippedFileForUpload(batchIdentifier, file) {
+  for (var i = _registeredFilesForUpload[batchIdentifier].length - 1; i >= 0; i--) {
+      if (_registeredFilesForUpload[batchIdentifier][i] === file.name) {
+          _registeredFilesForUpload[batchIdentifier].splice(i, 1);
+          break;
+      }
+  }
+
+  return _registeredFilesForUpload[batchIdentifier].length == 0;
+}
+
 $(document).ready(function() {
   
   // Workaround Firefox and IE not showing file selection dialog when clicking on "upload-file" <button>
@@ -230,6 +249,7 @@ $(document).ready(function() {
     
     done: function(e, data) {
       _reload(_path);
+      console.log("done");
     },
     
     fail: function(e, data) {
@@ -241,6 +261,43 @@ $(document).ready(function() {
     
     always: function(e, data) {
       data.context.remove();
+    },
+
+    drop: function(e, data) {
+      if(data.files.length > 1) {
+        var zip = new JSZip();
+
+        
+
+        var that = this;
+        var dt = new Date();
+        var dateString = dt.getFullYear() + "" + ((dt.getMonth() + 1) < 10 ? '0' : '') + (dt.getMonth() + 1) + "" + (dt.getDate() < 10 ? '0' : '') + dt.getDate() + "-" + (dt.getHours() < 10 ? '0' : '') + dt.getHours() + "" + (dt.getMinutes() < 10 ? '0' : '') + dt.getMinutes() + "" + (dt.getSeconds() < 10 ? '0' : '') + dt.getSeconds();
+        var zipFileName = dateString + "_" + data.files.length + "_files.zip";
+
+        var $zipUpload = $(tmpl("template-uploads", {
+          path: _path + zipFileName + " (zipping)"
+        }));
+        
+        $zipUpload.appendTo("#uploads");
+        $(".uploading").show();
+
+        _registerFilesForUpload(dateString, data.files);
+
+        $.each(data.files, function (index, file) {
+          var reader = new FileReader();
+          reader.onload = function(){
+            zip.file(file.name, reader.result, {binary: true});
+            
+            if(_unregisterZippedFileForUpload(dateString, file)) {
+              var blob = zip.generate({type:"blob"});
+              $zipUpload.remove();
+              $(that).fileupload('add', {files: [new File([blob], zipFileName)]})
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        });
+        data.files = [];
+      }
     },
     
   });
