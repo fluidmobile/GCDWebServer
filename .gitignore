@@ -4,3 +4,4 @@ project.xcworkspace
 
 Tests/Payload
 Carthage/Build
+DerivedData
