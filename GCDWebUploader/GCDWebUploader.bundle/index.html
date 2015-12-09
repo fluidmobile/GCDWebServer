@@ -31,7 +31,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>%title%</title>
+    <title>This is tellly – feed me with books.</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/bootstrap-theme.css">
     <link rel="stylesheet" href="css/jquery.fileupload.css">
@@ -57,41 +57,52 @@
     <div class="container">
       
       <div class="page-header">
-        <h1>%header%</h1>
+       <div class="logo-image"></div>
       </div>
-      
-      %prologue%
-      
-      <div id="alerts"></div>
+       <div id="alerts"></div>
+    <button type="button" class="drag-here" id="upload-file">
+    <!-- <input id="fileupload" type="file" name="files[]" multiple>-->
+      </button> 
+
+
+
+      <div class="content-text">%prologue%</div>
+
+
+
+     
       
       <div class="btn-toolbar">
-        <button type="button" class="btn btn-primary fileinput-button" id="upload-file">
+          <div class="outer">
+    <div class="inner">
+       <button type="button" class="btn btn-primary fileinput-button" id="upload-file">
           <span class="glyphicon glyphicon-upload"></span> Upload Files&hellip;
           <input id="fileupload" type="file" name="files[]" multiple>
         </button>
-        <button type="button" class="btn btn-success" id="create-folder">
+      <!--  <button type="button" class="btn btn-success" id="create-folder">
           <span class="glyphicon glyphicon-folder-close"></span> Create Folder&hellip;
         </button>
         <button type="button" class="btn btn-default" id="reload">
           <span class="glyphicon glyphicon-refresh"></span> Refresh
-        </button>
+        </button>-->
       </div>
+       </div> </div>
       
       <div class="panel panel-default uploading">
         <div class="panel-heading">File Uploads in Progress</div>
         <table class="table table-striped"><tbody id="uploads"></tbody></table>
       </div>
       
-      <div class="panel panel-default">
+     <!--   <div class="panel panel-default">
         <div class="panel-heading">
           <ol class="breadcrumb" id="path"></ol>
         </div>
         <table class="table table-striped"><tbody id="listing"></tbody></table>
-      </div>
+      </div>-->
       
-      %epilogue%
+      <!-- %epilogue% From App -->
       
-      <p class="footer">%footer%</p>
+      <!-- <p class="footer">%footer%</p> From App -->
       
     </div>
     
