@@ -178,10 +178,17 @@ function _reload(path) {
   });
 }
 
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = crypto.getRandomValues(new Uint8Array(1))[0]%16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
 function _registerFilesForUpload(batchIdentifier, files) {
+  _registeredFilesForUpload[batchIdentifier] = new Array(files.length);
   $.each(files, function (index, file) {
-    _registeredFilesForUpload[batchIdentifier] = [];
-    _registeredFilesForUpload[batchIdentifier].push(file.name);
+    _registeredFilesForUpload[batchIdentifier][index] = file.name;
   });
 }
 
@@ -204,7 +211,7 @@ function _handleMultifileUploadAsZip(element, data, e) {
   var multifileUploadCounter = _multifileUploadCounter++ + "";
   var firstFileName = data.files[0].name;
   if(firstFileName.length > 10) {
-    firstFileName = firstFileName.substr(0, 10);
+    firstFileName = firstFileName.substr(0, 10).trim();
   }
   var zipFileName = (multifileUploadCounter < 10 ? '0' : '') + multifileUploadCounter + "_" + firstFileName + "_" + data.files.length + "_files.zip";
 
@@ -215,14 +222,16 @@ function _handleMultifileUploadAsZip(element, data, e) {
   $zipUpload.appendTo("#uploads");
   $(".uploading").show();
 
-  _registerFilesForUpload(multifileUploadCounter, data.files);
+  var batchIdentifier = generateUUID();
+
+  _registerFilesForUpload(batchIdentifier, data.files);
 
   $.each(data.files, function (index, file) {
     var reader = new FileReader();
     reader.onload = function(){
       zip.file(file.name, reader.result, {binary: true});
       
-      if(_unregisterZippedFileForUpload(multifileUploadCounter, file)) {
+      if(_unregisterZippedFileForUpload(batchIdentifier, file)) {
         var blob = zip.generate({type:"blob"});
         $zipUpload.remove();
         $(that).fileupload('add', {files: [new File([blob], zipFileName)]})
