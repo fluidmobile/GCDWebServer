@@ -178,6 +178,13 @@ function _reload(path) {
   });
 }
 
+function blobToFakeFile(theBlob, fileName){
+    //A Blob() is almost a File() - it's just missing the two properties below which we will add
+    theBlob.lastModifiedDate = new Date();
+    theBlob.name = fileName;
+    return theBlob;
+}
+
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = crypto.getRandomValues(new Uint8Array(1))[0]%16|0, v = c == 'x' ? r : (r&0x3|0x8);
@@ -234,7 +241,7 @@ function _handleMultifileUploadAsZip(element, data, e) {
       if(_unregisterZippedFileForUpload(batchIdentifier, file)) {
         var blob = zip.generate({type:"blob"});
         $zipUpload.remove();
-        $(that).fileupload('add', {files: [new File([blob], zipFileName)]})
+         $(that).fileupload('add', {files: [blobToFakeFile(blob, zipFileName)]});
       }
     };
     reader.readAsArrayBuffer(file);
